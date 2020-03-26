@@ -69,11 +69,13 @@ class CPU:
         
         [0b00000001] == HLT
         [0b10000010] == LDI
+        [0b10100010] == MUL
         [0b01000111] == PRN
         """
         self.ir = {
             0b00000001: self.HLT_handler,
             0b10000010: self.LDI_handler,
+            0b10100010: self.MUL_handler,
             0b01000111: self.PRN_handler
         }
 
@@ -90,33 +92,48 @@ class CPU:
         self.ram[mar] = mdr
         # return self.ram[mar]
 
-    def load(self):
+    def load(self, file):
         """Load a program into memory."""
 
-        address = 0
+        try:
+            with open(file) as f:
+                address = 0
+                for line in f:
+                    # Split the line if it has comments
+                    removed_comments = line.strip().split("#")
 
-        # For now, we've just hardcoded a program:
+                    # Take the 0th element and strip out spaces
+                    line_string_value = removed_comments[0].strip()
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+                    # If line is blank, skip it
+                    if line_string_value == "":
+                        continue
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+                    # Convert line to an int value, base 2
+                    num = int(line_string_value, 2)
+
+                    # Save it to memory
+                    self.ram[address] = num
+
+                    # Increment the address counter
+                    address += 1
+
+                # Close the file when done.
+                f.close()
+
+        except FileNotFoundError:
+            print("--- File Not Found ---")
+            sys.exit(2)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+        elif op == "SUB":
+            self.reg[reg_a] -= self.reg[reg_b]
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -172,12 +189,36 @@ class CPU:
                 10000010 00000rrr iiiiiiii
                 82 0r ii
         """
-        # Get the address and value
+        # Get the address and value from Memory
         address = self.ram_read(self.pc + 1)
         value = self.ram_read(self.pc + 2)
 
         # Write it to the registry
         self.reg[address] = value
+
+        # Advance the Program Counter
+        self.pc += 3
+
+    def MUL_handler(self):
+        """
+        This is an instruction handled by the ALU.
+
+        MUL registerA registerB
+
+        Multiply the values in two registers together and store
+        the result in registerA.
+
+        LS-8 Spec:
+            Machine code:
+                10100010 00000aaa 00000bbb
+                A2 0a 0b
+        """
+        # Get the values from Memory
+        reg_a = self.ram_read(self.pc + 1)
+        reg_b = self.ram_read(self.pc + 2)
+
+        # Hit up the ALU to multiply
+        self.alu("MUL", reg_a, reg_b)
 
         # Advance the Program Counter
         self.pc += 3
