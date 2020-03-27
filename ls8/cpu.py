@@ -239,6 +239,8 @@ class CPU:
         """
         if self.fl == [0b00000001]:
             self.JMP_handler()
+        else:
+            self.pc += 2
 
     def JMP_handler(self):
         """
@@ -265,6 +267,8 @@ class CPU:
         """
         if self.fl != [0b00000001]:
             self.JMP_handler()
+        else:
+            self.pc += 2
 
     def LDI_handler(self):
         """
