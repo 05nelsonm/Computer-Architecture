@@ -225,6 +225,17 @@ class CPU:
         """
         pass
 
+    def JNE_handler(self):
+        """
+        LS-8 Spec:
+            If E flag is clear (false, 0), jump to the address stored in the given register.
+
+            Machine code:
+                01010110 00000rrr
+                56 0r
+        """
+        pass
+
     def LDI_handler(self):
         """
         This instruction sets a specified register to a specified value.
