@@ -142,10 +142,21 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        elif op == "SUB":
-            self.reg[reg_a] -= self.reg[reg_b]
+
+        elif op == "CMP":
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.fl = [0b00000001]
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.fl = [0b00000010]
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                self.fl = [0b00000100]
+
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
+
+        elif op == "SUB":
+            self.reg[reg_a] -= self.reg[reg_b]
+
         else:
             raise Exception("Unsupported ALU operation")
 
