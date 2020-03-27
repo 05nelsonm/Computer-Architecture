@@ -67,7 +67,11 @@ class CPU:
         """
         Instruction Registry Dictionary:
         
+        [0b10100111] == CMP
         [0b00000001] == HLT
+        [0b01010101] == JEQ
+        [0b01010100] == JMP
+        [0b01010110] == JNE
         [0b10000010] == LDI
         [0b10100010] == MUL
         [0b01000110] == POP
@@ -75,7 +79,11 @@ class CPU:
         [0b01000101] == PUSH
         """
         self.ir = {
+            0b10100111: self.CMP_handler,
             0b00000001: self.HLT_handler,
+            0b01010101: self.JEQ_handler,
+            0b01010100: self.JMP_handler,
+            0b01010110: self.JNE_handler,
             0b10000010: self.LDI_handler,
             0b10100010: self.MUL_handler,
             0b01000110: self.POP_handler,
@@ -134,10 +142,21 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        elif op == "SUB":
-            self.reg[reg_a] -= self.reg[reg_b]
+
+        elif op == "CMP":
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.fl = [0b00000001]
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.fl = [0b00000010]
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                self.fl = [0b00000100]
+
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
+
+        elif op == "SUB":
+            self.reg[reg_a] -= self.reg[reg_b]
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -161,6 +180,32 @@ class CPU:
 
         print()
 
+    def CMP_handler(self):
+        """
+        This is an instruction handled by the ALU.
+        CMP registerA registerB
+
+        LS-8 Spec:
+            Compare the values in two registers.
+            If they are equal, set the Equal E flag to 1, otherwise set it to 0.
+            If registerA is less than registerB, set the Less-than L flag to 1, otherwise set it to 0.
+            If registerA is greater than registerB, set the Greater-than G flag to 1, otherwise set it to 0.
+
+            Machine code:
+
+                10100111 00000aaa 00000bbb
+                A7 0a 0b
+        """
+        # Get the values from Memory
+        reg_a = self.ram_read(self.pc + 1)
+        reg_b = self.ram_read(self.pc + 2)
+
+        # Hit up the ALU to multiply
+        self.alu("CMP", reg_a, reg_b)
+
+        # Advance the Program Counter
+        self.pc += 3
+
     def HLT_handler(self):
         """
         Add the HLT instruction definition to cpu.py so that you can
@@ -181,6 +226,49 @@ class CPU:
                 01
         """
         sys.exit(0)
+
+    def JEQ_handler(self):
+        """
+        LS-8 Spec:
+            If equal flag is set (true), jump to the address stored in the
+            given register.
+
+            Machine code:
+                01010101 00000rrr
+                55 0r
+        """
+        if self.fl == [0b00000001]:
+            self.JMP_handler()
+        else:
+            self.pc += 2
+
+    def JMP_handler(self):
+        """
+        Jump to the address stored in the given register.
+
+        LS-8 Spec:
+            Set the PC to the address stored in the given register.
+
+            Machine code:
+                01010100 00000rrr
+                54 0r
+        """
+        address = self.ram_read(self.pc + 1)
+        self.pc = self.reg[address]
+
+    def JNE_handler(self):
+        """
+        LS-8 Spec:
+            If E flag is clear (false, 0), jump to the address stored in the given register.
+
+            Machine code:
+                01010110 00000rrr
+                56 0r
+        """
+        if self.fl != [0b00000001]:
+            self.JMP_handler()
+        else:
+            self.pc += 2
 
     def LDI_handler(self):
         """
