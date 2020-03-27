@@ -70,13 +70,17 @@ class CPU:
         [0b00000001] == HLT
         [0b10000010] == LDI
         [0b10100010] == MUL
+        [0b01000110] == POP
         [0b01000111] == PRN
+        [0b01000101] == PUSH
         """
         self.ir = {
             0b00000001: self.HLT_handler,
             0b10000010: self.LDI_handler,
             0b10100010: self.MUL_handler,
-            0b01000111: self.PRN_handler
+            0b01000110: self.POP_handler,
+            0b01000111: self.PRN_handler,
+            0b01000101: self.PUSH_handler
         }
 
     def ram_read(self, mar):
@@ -223,6 +227,33 @@ class CPU:
         # Advance the Program Counter
         self.pc += 3
 
+    def POP_handler(self):
+        """
+        Pop the value at the top of the stack into the given register.
+
+        LS-8 Spec:
+            Copy the value from the address pointed to by SP to the
+             given register.
+
+            Increment SP.
+
+            Machine code:
+                01000110 00000rrr
+                46 0r
+        """
+        # Get the value from Memory using the Stack Pointer
+        address = self.ram_read(self.pc + 1)
+        value = self.ram[self.reg[7]]
+
+        # Copy it to the given registry
+        self.reg[address] = value
+
+        # Increment the Stack Pointer
+        self.reg[7] += 1
+
+        # Increment the Program Counter
+        self.pc += 2
+
     def PRN_handler(self):
         """
         This is a very similar process to adding LDI, but the handler is
@@ -245,6 +276,33 @@ class CPU:
 
         # Advance the Program Counter
         self.pc += 2
+
+    def PUSH_handler(self):
+        """
+        Push the value in the given register on the stack.
+
+        LS-8 Spec:
+            Decrement the SP.
+            Copy the value in the given register to the address
+             pointed to by SP.
+
+            Machine code:
+                01000101 00000rrr
+                45 0r
+        """
+        # Get the value from Register
+        address = self.ram_read(self.pc + 1)
+        value = self.reg[address]
+
+        # Decrement the Stack Pointer
+        self.reg[7] -= 1
+
+        # Copy in the given registry value using the Stack Pointer
+        self.ram[self.reg[7]] = value
+
+        # Increment the Program Counter
+        self.pc += 2
+
 
     def run(self):
         """
