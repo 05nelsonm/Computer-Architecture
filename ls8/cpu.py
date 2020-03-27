@@ -263,7 +263,8 @@ class CPU:
                 01010110 00000rrr
                 56 0r
         """
-        pass
+        if self.fl != [0b00000001]:
+            self.JMP_handler()
 
     def LDI_handler(self):
         """
