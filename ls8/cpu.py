@@ -237,7 +237,8 @@ class CPU:
                 01010101 00000rrr
                 55 0r
         """
-        pass
+        if self.fl == [0b00000001]:
+            self.JMP_handler()
 
     def JMP_handler(self):
         """
