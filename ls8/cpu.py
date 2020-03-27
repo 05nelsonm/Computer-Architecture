@@ -67,7 +67,11 @@ class CPU:
         """
         Instruction Registry Dictionary:
         
+        [0b10100111] == CMP
         [0b00000001] == HLT
+        [0b01010101] == JEQ
+        [0b01010100] == JMP
+        [0b01010110] == JNE
         [0b10000010] == LDI
         [0b10100010] == MUL
         [0b01000110] == POP
@@ -75,7 +79,11 @@ class CPU:
         [0b01000101] == PUSH
         """
         self.ir = {
+            0b10100111: self.CMP_handler,
             0b00000001: self.HLT_handler,
+            0b01010101: self.JEQ_handler,
+            0b01010100: self.JMP_handler,
+            0b01010110: self.JNE_handler,
             0b10000010: self.LDI_handler,
             0b10100010: self.MUL_handler,
             0b01000110: self.POP_handler,
