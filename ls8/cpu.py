@@ -200,6 +200,19 @@ class CPU:
         """
         sys.exit(0)
 
+    def JMP_handler(self):
+        """
+        Jump to the address stored in the given register.
+
+        LS-8 Spec:
+            Set the PC to the address stored in the given register.
+
+            Machine code:
+                01010100 00000rrr
+                54 0r
+        """
+        pass
+
     def LDI_handler(self):
         """
         This instruction sets a specified register to a specified value.
