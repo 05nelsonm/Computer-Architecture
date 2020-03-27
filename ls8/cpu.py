@@ -251,7 +251,8 @@ class CPU:
                 01010100 00000rrr
                 54 0r
         """
-        pass
+        address = self.ram_read(self.pc + 1)
+        self.pc = self.reg[address]
 
     def JNE_handler(self):
         """
