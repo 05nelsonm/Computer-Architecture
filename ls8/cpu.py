@@ -161,6 +161,24 @@ class CPU:
 
         print()
 
+    def CMP_handler(self):
+        """
+        This is an instruction handled by the ALU.
+        CMP registerA registerB
+
+        LS-8 Spec:
+            Compare the values in two registers.
+            If they are equal, set the Equal E flag to 1, otherwise set it to 0.
+            If registerA is less than registerB, set the Less-than L flag to 1, otherwise set it to 0.
+            If registerA is greater than registerB, set the Greater-than G flag to 1, otherwise set it to 0.
+
+            Machine code:
+
+                10100111 00000aaa 00000bbb
+                A7 0a 0b
+        """
+        pass
+
     def HLT_handler(self):
         """
         Add the HLT instruction definition to cpu.py so that you can
