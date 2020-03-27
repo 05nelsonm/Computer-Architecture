@@ -200,6 +200,18 @@ class CPU:
         """
         sys.exit(0)
 
+    def JEQ_handler(self):
+        """
+        LS-8 Spec:
+            If equal flag is set (true), jump to the address stored in the
+            given register.
+
+            Machine code:
+                01010101 00000rrr
+                55 0r
+        """
+        pass
+
     def JMP_handler(self):
         """
         Jump to the address stored in the given register.
