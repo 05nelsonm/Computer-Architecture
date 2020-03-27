@@ -185,7 +185,15 @@ class CPU:
                 10100111 00000aaa 00000bbb
                 A7 0a 0b
         """
-        pass
+        # Get the values from Memory
+        reg_a = self.ram_read(self.pc + 1)
+        reg_b = self.ram_read(self.pc + 2)
+
+        # Hit up the ALU to multiply
+        self.alu("CMP", reg_a, reg_b)
+
+        # Advance the Program Counter
+        self.pc += 3
 
     def HLT_handler(self):
         """
